@@ -1,0 +1,48 @@
+{
+  "port": 443,
+  "algorithm": "weighted-round-robin",
+  "healthCheck": {
+    "enabled": true,
+    "interval": 10000,
+    "timeout": 5000,
+    "path": "/health",
+    "failureThreshold": 5,
+    "successThreshold": 3
+  },
+  "rateLimit": {
+    "enabled": true,
+    "windowMs": 60000,
+    "maxRequests": 1000,
+    "perIP": true,
+    "perUser": true,
+    "userHeader": "X-User-ID"
+  },
+  "servers": [
+    {
+      "id": "prod-server-1",
+      "url": "https://backend1.yourdomain.com",
+      "weight": 2,
+      "enabled": true
+    },
+    {
+      "id": "prod-server-2",
+      "url": "https://backend2.yourdomain.com",
+      "weight": 2,
+      "enabled": true
+    }
+  ],
+  "monitoring": {
+    "enabled": true,
+    "metricsEndpoint": "/metrics"
+  },
+  "security": {
+    "requireAuth": true,
+    "https": {
+      "enabled": true,
+      "keyPath": "/path/to/privkey.pem",
+      "certPath": "/path/to/fullchain.pem"
+    },
+    "_comment": "Set ADMIN_API_KEY and JWT_SECRET via environment variables. Never commit secrets to this file."
+  }
+}
+

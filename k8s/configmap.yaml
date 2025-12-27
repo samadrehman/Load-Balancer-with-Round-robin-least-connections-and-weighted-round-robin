@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: load-balancer-config
+data:
+  default-config.json: |
+    {
+      "port": 3000,
+      "algorithm": "round-robin",
+      "healthCheck": {
+        "enabled": true,
+        "interval": 5000,
+        "timeout": 3000,
+        "path": "/health",
+        "failureThreshold": 3,
+        "successThreshold": 2
+      },
+      "rateLimit": {
+        "enabled": true,
+        "windowMs": 60000,
+        "maxRequests": 100,
+        "perIP": true,
+        "perUser": false,
+        "userHeader": "X-User-ID"
+      },
+      "servers": [
+        {
+          "id": "server1",
+          "url": "http://server1:3001",
+          "weight": 1,
+          "enabled": true
+        },
+        {
+          "id": "server2",
+          "url": "http://server2:3002",
+          "weight": 1,
+          "enabled": true
+        }
+      ],
+      "monitoring": {
+        "enabled": true,
+        "metricsEndpoint": "/metrics"
+      },
+      "security": {
+        "adminApiKey": "change-me-in-production",
+        "requireAuth": true
+      }
+    }
+

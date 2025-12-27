@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  load-balancer:
+    build: .
+    container_name: load-balancer
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - ADMIN_API_KEY=${ADMIN_API_KEY:-change-me-in-production}
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    volumes:
+      - ./src/config:/app/dist/config:ro
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/lb/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    networks:
+      - load-balancer-network
+
+  # Example backend servers
+  server1:
+    build:
+      context: .
+      dockerfile: Dockerfile.example
+    container_name: server1
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+    networks:
+      - load-balancer-network
+
+  server2:
+    build:
+      context: .
+      dockerfile: Dockerfile.example
+    container_name: server2
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+    networks:
+      - load-balancer-network
+
+networks:
+  load-balancer-network:
+    driver: bridge
+
